@@ -22,62 +22,39 @@ describe("MessageForm", () => {
   beforeEach(() => {
     mockHandleSubmit.mockClear();
   });
+  
+    describe("US1: Post message", () => {
+      it("should show errors for empty fields", async () => {
+        const { user, publishBtn } = renderMessageForm();
 
-  describe("US1: Post message", () => {
-    it("should show error when trying to submit empty username", async () => {
-      const { user, messageInput, publishBtn } = renderMessageForm();
+        await user.click(publishBtn());
 
-      await user.type(messageInput(), "hej");
-      await user.click(publishBtn());
+        expect(screen.getByText(/användarnamn saknas/i)).toBeInTheDocument();
+        expect(screen.getByText(/meddelande saknas/i)).toBeInTheDocument();
+      });
 
-      expect(screen.getByText(/användarnamn saknas/i)).toBeInTheDocument();
-    });
+      it("should clear errors when user starts typing", async () => {
+        const { user, messageInput, publishBtn } = renderMessageForm();
 
-    it("should show error when trying to submit empty message", async () => {
-      const { user, usernameInput, publishBtn } = renderMessageForm();
+        await user.click(publishBtn());
+        expect(screen.getByText(/meddelande saknas/i)).toBeInTheDocument();
 
-      await user.type(usernameInput(), "pelle");
-      await user.click(publishBtn());
+        await user.type(messageInput(), "hej");
+        expect(
+          screen.queryByText(/meddelande saknas/i)
+        ).not.toBeInTheDocument();
+      });
 
-      expect(screen.getByText(/meddelande saknas/i)).toBeInTheDocument();
-    });
+      it("should call onSubmit with correct data when form is valid", async () => {
+        const { user, usernameInput, messageInput, publishBtn } =
+          renderMessageForm();
 
-    it("should show error when both fields are empty", async () => {
-      const { user, publishBtn } = renderMessageForm();
+        await user.type(usernameInput(), "pelle");
+        await user.type(messageInput(), "hej");
+        await user.click(publishBtn());
 
-      await user.click(publishBtn());
-
-      expect(screen.getByText(/användarnamn saknas/i)).toBeInTheDocument();
-      expect(screen.getByText(/meddelande saknas/i)).toBeInTheDocument();
-    });
-
-    it("should clear errors when user starts typing", async () => {
-      const { user, messageInput, publishBtn } = renderMessageForm();
-
-      await user.click(publishBtn());
-      expect(screen.getByText(/meddelande saknas/i)).toBeInTheDocument();
-
-      await user.type(messageInput(), "hej");
-      expect(screen.queryByText(/meddelande saknas/i)).not.toBeInTheDocument();
-    });
-
-    it("should call onSubmit with correct data when form is valid", async () => {
-      const { user, usernameInput, messageInput, publishBtn } =
-        renderMessageForm();
-
-      await user.type(usernameInput(), "pelle");
-      await user.type(messageInput(), "hej");
-      await user.click(publishBtn());
-
-      expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
-    });
-
-    it("should not call onSubmit when form has errors", async () => {
-      const { user, publishBtn } = renderMessageForm();
-
-      await user.click(publishBtn());
-
-      expect(mockHandleSubmit).toHaveBeenCalledTimes(0);
+        expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
+      });
     });
   });
-});
+

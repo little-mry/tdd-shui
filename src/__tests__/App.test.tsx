@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "../App";
 
-describe("App", () => {
+describe("App - Integration", () => {
   const renderApp = () => {
     const user = userEvent.setup();
     render(<App />);
@@ -25,26 +25,7 @@ describe("App", () => {
       expect(queryPublishBtn()).not.toBeInTheDocument();
     });
 
-    it('should show write form (new message component) then clicking on "new message"-button', async () => {
-      const { user, newMsgBtn, publishBtn } = renderApp();
-      await user.click(newMsgBtn());
-      expect(publishBtn()).toBeInTheDocument();
-    });
-
-    it("should return to list view after posting message", async () => {
-      const { user, newMsgBtn, publishBtn, queryPublishBtn, usernameInput, messageInput } = renderApp();
-      await user.click(newMsgBtn());
-
-
-      await user.type(usernameInput(), "TestUser");
-      await user.type(messageInput(), "Test meddelande");
-      await user.click(publishBtn());
-
-      expect(newMsgBtn()).toBeInTheDocument();
-      expect(queryPublishBtn()).not.toBeInTheDocument();
-    });
-
-    it("should clear input data if user returns from new message-view without posting", async () => {
+    it(" should clear input data if user returns from new message-view without posting", async () => {
       const { user, newMsgBtn, usernameInput, messageInput } = renderApp();
 
       await user.click(newMsgBtn());
@@ -58,6 +39,23 @@ describe("App", () => {
 
       const newUsernameInput = screen.getByPlaceholderText(/namn/i);
       expect(newUsernameInput).toHaveValue("");
+    });
+  });
+
+  describe("US1: Post Message", () => {
+    it("US1 + US3: should return to list view, and display new message first in list after posting", async () => {
+      const { user, newMsgBtn, usernameInput, messageInput, publishBtn } =
+        renderApp();
+
+      await user.click(newMsgBtn());
+      await user.type(usernameInput(), "NewUser");
+      await user.type(messageInput(), "Senaste meddelandet");
+      await user.click(publishBtn());
+      const messageItems = screen.getAllByTestId("message-item");
+
+      expect(screen.getByText("NewUser")).toBeInTheDocument();
+      expect(screen.getByText("Senaste meddelandet")).toBeInTheDocument();
+      expect(messageItems[0]).toHaveTextContent("NewUser");
     });
   });
 });
