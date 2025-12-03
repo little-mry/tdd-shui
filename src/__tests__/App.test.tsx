@@ -13,6 +13,8 @@ describe("App", () => {
       publishBtn: () => screen.getByRole("button", { name: /publicera/i }),
       queryPublishBtn: () =>
         screen.queryByRole("button", { name: /publicera/i }),
+      usernameInput: () => screen.getByPlaceholderText(/namn/i),
+      messageInput: () => screen.getByPlaceholderText(/meddelande/i),
     };
   };
 
@@ -30,35 +32,30 @@ describe("App", () => {
     });
 
     it("should return to list view after posting message", async () => {
-      const { user, newMsgBtn, publishBtn, queryPublishBtn } = renderApp();
+      const { user, newMsgBtn, publishBtn, queryPublishBtn, usernameInput, messageInput } = renderApp();
       await user.click(newMsgBtn());
 
-      const usernameInput = screen.getByPlaceholderText(/namn/i);
-      await user.type(usernameInput, "TestUser");
 
-      const messageInput = screen.getByPlaceholderText(/meddelande/i);
-      await user.type(messageInput, "Test meddelande");
-
+      await user.type(usernameInput(), "TestUser");
+      await user.type(messageInput(), "Test meddelande");
       await user.click(publishBtn());
+
       expect(newMsgBtn()).toBeInTheDocument();
       expect(queryPublishBtn()).not.toBeInTheDocument();
     });
 
     it("should clear input data if user returns from new message-view without posting", async () => {
-      const { user, newMsgBtn } = renderApp();
-      await user.click(newMsgBtn());
+      const { user, newMsgBtn, usernameInput, messageInput } = renderApp();
 
-      const usernameInput = screen.getByPlaceholderText(/namn/i);
-      await user.type(usernameInput, "TestUser");
-      
-      const messageInput = screen.getByPlaceholderText(/meddelande/i);
-      await user.type(messageInput, "Test meddelande");
-      
+      await user.click(newMsgBtn());
+      await user.type(usernameInput(), "TestUser");
+      await user.type(messageInput(), "Test meddelande");
+
       const cancelBtn = screen.getByRole("button", { name: /avbryt/i });
       await user.click(cancelBtn);
 
       await user.click(newMsgBtn());
-      
+
       const newUsernameInput = screen.getByPlaceholderText(/namn/i);
       expect(newUsernameInput).toHaveValue("");
     });
