@@ -16,13 +16,13 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        uses: npm ci
+        run: npm ci
 
       - name: Run tests
-        uses: npm run test:ci
+        run: npm run test:ci
 
       - name: Run linter
-        uses: npm run lint
+        run: npm run lint
 
       - name: Build project
-        uses: npm run build
+        run: npm run build
